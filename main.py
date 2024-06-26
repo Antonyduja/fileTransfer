@@ -35,7 +35,7 @@ def list_files_metadata():
             file_path = os.path.join(folder_location, filename)
             if os.path.isfile(file_path):
                 file_stat = os.stat(file_path)
-                download_url = f"/download/{filename}"
+                download_url = f"/download/filename?={file_path}"
                 metadata = {
                     'filename': filename,
                     'type': os.path.splitext(filename)[1][1:],
@@ -73,7 +73,7 @@ def list_files_metadata(folder: str = Query(..., description="The name of the fi
             file_path = os.path.join(folder, filename)
             if os.path.isfile(file_path):
                 file_stat = os.stat(file_path)
-                download_url = f"/download/{filename}"
+                download_url = f"/download/filename?={file_path}"
                 metadata = {
                     'filename': filename,
                     'type': os.path.splitext(filename)[1][1:],
@@ -177,7 +177,7 @@ def download_file(filename: str = Query(..., description="The name of the file t
                 'last_modified': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
                 'file_Path': file_path
             }
-        download_url = f"/download/{filename}"
+        download_url = f"/download/filename?={filename}"
         return {
                 "fileDetail": metadata,
                 "downloadUrl": download_url
@@ -187,10 +187,12 @@ def download_file(filename: str = Query(..., description="The name of the file t
 
 @app.get("/download")
 def download(filename: str = Query(..., description="The name of the file to download")):
-    config = read_config_file()
-    folder_location = config['folder_location']
-    file_path = os.path.join(folder_location, filename)
-    
+    print("Hello")
+    # config = read_config_file()
+    # folder_location = config['folder_location']
+    # file_path = os.path.join(folder_location, filename)
+    file_path=filename
+    print(file_path)
     if not os.path.isfile(file_path):
         raise HTTPException(status_code=404, detail="File not found")
     file_extension = os.path.splitext(filename)[1][1:].lower()
