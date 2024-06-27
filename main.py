@@ -24,9 +24,9 @@ def read_config_file():
         config = json.load(f)
     return config
 
-# Endpoint to list files with metadata
+# Endpoint to list files with metadata for the folder path given in the json file
 @app.get("/rootFileList")
-def list_files_metadata():
+def get_root_files_metadata():
     try:
         config = read_config_file()
         folder_location = config['folder_location']
@@ -35,22 +35,22 @@ def list_files_metadata():
             file_path = os.path.join(folder_location, filename)
             if os.path.isfile(file_path):
                 file_stat = os.stat(file_path)
-                download_url = f"/download/filename?={file_path}"
+                # download_url = f"/download/filename?={file_path}"
                 metadata = {
                     'filename': filename,
                     'type': os.path.splitext(filename)[1][1:],
                     'size': file_stat.st_size,
                     'last_modified': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
-                    'downloadUrl': download_url
+                    'downloadUrl': file_path
                 }
             elif os.path.isdir(file_path):
-                list_url = f"/getFileList?folder={file_path}"
+                # list_url = f"/getFileList?folder={file_path}"
                 metadata = {
                     'filename': filename,
                     'type': 'folder',
                     'size': None,
                     'last_modified': None,
-                    'file_Path':list_url
+                    'file_Path': file_path
                 }
             files_metadata.append(metadata)
         file_details = {
@@ -65,21 +65,22 @@ def list_files_metadata():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Endpoint to fetch metadata of the files in a specific folder
 @app.get("/getFileList")
-def list_files_metadata(folder: str = Query(..., description="The name of the file to download")):
+def get_folder_files_metadata(folder: str = Query(..., description="path of the file to fetch metadata")):
     try:
         files_metadata = []
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
             if os.path.isfile(file_path):
                 file_stat = os.stat(file_path)
-                download_url = f"/download/filename?={file_path}"
+                # download_url = f"/download/filename?={file_path}"
                 metadata = {
                     'filename': filename,
                     'type': os.path.splitext(filename)[1][1:],
                     'size': file_stat.st_size,
                     'last_modified': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
-                    'downloadUrl': download_url
+                    'downloadUrl': file_path
                 }
             elif os.path.isdir(file_path):
                 list_url = f"/getFileList?folder={file_path}"
@@ -103,9 +104,9 @@ def list_files_metadata(folder: str = Query(..., description="The name of the fi
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Endpoint to download content of all files
+# Endpoint to download content of all files from the folder given in the json file
 @app.get("/downloadAllFiles")
-def download_all_files():
+def save_all_files_to_current_directory():
     try:
         config = read_config_file()
         folder_location = config['folder_location']
@@ -133,8 +134,9 @@ def download_all_files():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Endpoint to download a specific file from the folder given in the json file
 @app.get("/downloadFile")
-def download_file(filename: str = Query(..., description="The name of the file to download")):
+def save_file_to_current_directory(filename: str = Query(..., description="path of the file to save it in the current directory")):
     try:
         config = read_config_file()
         folder_location = config['folder_location']
@@ -158,8 +160,9 @@ def download_file(filename: str = Query(..., description="The name of the file t
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Endpoint to 
 @app.get("/getContent")
-def download_file(filename: str = Query(..., description="The name of the file to download")):
+def get_file_metadata(filename: str = Query(..., description="path of the file to get the metadata")):
     try:
         config = read_config_file()
         folder_location = config['folder_location']
@@ -177,22 +180,21 @@ def download_file(filename: str = Query(..., description="The name of the file t
                 'last_modified': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
                 'file_Path': file_path
             }
-        download_url = f"/download/filename?={filename}"
+        # download_url = f"/download/filename={filename}"
         return {
-                "fileDetail": metadata,
-                "downloadUrl": download_url
+                "fileDetail": metadata
+                # "downloadUrl": download_url
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/download")
-def download(filename: str = Query(..., description="The name of the file to download")):
-    print("Hello")
+def download(filename: str = Query(..., description="path of the file to download")):
+    # print("Hello")
     # config = read_config_file()
     # folder_location = config['folder_location']
     # file_path = os.path.join(folder_location, filename)
     file_path=filename
-    print(file_path)
+    # print(file_path) # /Users/arshiya/api/api-client-programming.ipynb
     if not os.path.isfile(file_path):
         raise HTTPException(status_code=404, detail="File not found")
     file_extension = os.path.splitext(filename)[1][1:].lower()
