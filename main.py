@@ -65,6 +65,7 @@ def get_root_files_metadata():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # Endpoint to fetch metadata of the files in a specific folder
 @app.get("/getFileList")
 def get_folder_files_metadata(folder: str = Query(..., description="path of the file to fetch metadata")):
